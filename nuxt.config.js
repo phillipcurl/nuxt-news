@@ -4,7 +4,8 @@ module.exports = {
    */
   head: {
     title: 'starter',
-    meta: [{
+    meta: [
+      {
         charset: 'utf-8'
       },
       {
@@ -17,11 +18,13 @@ module.exports = {
         content: 'Nuxt.js project'
       }
     ],
-    link: [{
-      rel: 'icon',
-      type: 'image/x-icon',
-      href: '/favicon.ico'
-    }]
+    link: [
+      {
+        rel: 'icon',
+        type: 'image/x-icon',
+        href: '/favicon.ico'
+      }
+    ]
   },
   /*
    ** Global CSS
@@ -31,7 +34,7 @@ module.exports = {
    ** Add axios globally
    */
   build: {
-    vendor: ['axios'],
+    // vendor: ['axios'],
     /*
      ** Run ESLINT on save
      */
@@ -42,12 +45,13 @@ module.exports = {
           test: /\.(js|vue)$/,
           loader: 'eslint-loader',
           exclude: /(node_modules)/
-        })
+        });
       }
     }
   },
+  modules: ['@nuxtjs/axios', '@nuxtjs/dotenv', '@nuxtjs/pwa'],
   serverMiddleware: [
     // API middleware
     '~/api/index.js'
   ]
-}
+};

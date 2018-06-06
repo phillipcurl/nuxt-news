@@ -1,11 +1,10 @@
-const {
-  Router
-} = require('express')
+const { Router } = require('express');
 
-const router = Router()
+const router = Router();
 
 // Mock Users
-const users = [{
+const users = [
+  {
     name: 'Alexandre'
   },
   {
@@ -14,21 +13,21 @@ const users = [{
   {
     name: 'Sébastien'
   }
-]
+];
 
 /* GET users listing. */
-router.get('/users', function (req, res, next) {
-  res.json(users)
-})
+router.get('/users', function(req, res, next) {
+  res.json(users);
+});
 
 /* GET user by ID. */
-router.get('/users/:id', function (req, res, next) {
-  const id = parseInt(req.params.id)
+router.get('/users/:id', function(req, res, next) {
+  const id = parseInt(req.params.id);
   if (id >= 0 && id < users.length) {
-    res.json(users[id])
+    res.json(users[id]);
   } else {
-    res.sendStatus(404)
+    res.sendStatus(404);
   }
-})
+});
 
-module.exports = router
+module.exports = router;

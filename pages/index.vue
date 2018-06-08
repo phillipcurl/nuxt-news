@@ -4,8 +4,12 @@
     <h1 class="title">
       NEWS
     </h1>
+    <div v-if="loadingWeather">
+      LOADING WEATHER
+    </div>
     <no-ssr>
-      <weather 
+      <weather
+          v-if="!loadingWeather" 
           api-key="11fcbeefa79897d7a0d2af907557818b"
           title="Weather"
           :latitude="lat"
@@ -14,8 +18,14 @@
           units="us">
       </weather>
     </no-ssr>
-    <section class="mw7 center">
-      <article class="w-100 br2 shadow-3"
+    <section class="measure-wide center">
+      <story-card
+        v-for="(article, index) in articles"
+        :key="index"
+        :story="article"
+        class="mb4"
+      />
+      <!-- <article class="w-100 br2 shadow-3"
            v-for="(article, index) in articles"
            :key="index">
         <a :href="article.url" class="link" target="_blank">
@@ -31,7 +41,7 @@
             </p>
           </div>
         </a>
-      </article>
+      </article> -->
     </section>
   </div>
 </template>
@@ -40,6 +50,7 @@
 // import axios from '~/plugins/axios';
 import VueWeatherWidget from 'vue-weather-widget';
 import 'vue-weather-widget/dist/css/vue-weather-widget.css';
+import StoryCard from '~/components/StoryCard';
 
 export default {
   async asyncData({ app }) {
@@ -49,18 +60,19 @@ export default {
       }`
     );
 
-    const weather = await app.$axios.$get(
-      `https://api.openweathermap.org/data/2.5/weather?q=London&APPID=${
-        process.env.WEATHER_API_KEY
-      }`
-    );
+    // const weather = await app.$axios.$get(
+    //   `https://api.openweathermap.org/data/2.5/weather?q=London&APPID=${
+    //     process.env.WEATHER_API_KEY
+    //   }`
+    // );
 
-    return { articles, weather: weather };
+    return { articles };
   },
   data() {
     return {
       online: true,
       users: [],
+      loadingWeather: true,
       lat: 0,
       long: 0
     };
@@ -72,7 +84,7 @@ export default {
   },
   mounted() {
     console.log('articles: ', this.articles);
-    console.log('weather: ', this.weather);
+    // console.log('weather: ', this.weather);
     if (!window.navigator) {
       this.online = false;
       return;
@@ -93,12 +105,14 @@ export default {
     },
     _geoSuccess(position) {
       console.log('geo success. position is: ', position);
-      this.lat = position.coords.latitude;
-      this.long = position.coords.longitude;
+      this.lat = `${position.coords.latitude}`;
+      this.long = `${position.coords.longitude}`;
+      this.loadingWeather = false;
     }
   },
   components: {
-    weather: VueWeatherWidget
+    weather: VueWeatherWidget,
+    StoryCard
   }
 };
 </script>

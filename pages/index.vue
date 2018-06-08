@@ -1,62 +1,119 @@
 <template>
-  <section class="container">
-    <img src="~assets/img/logo.png" alt="Nuxt.js Logo" class="logo" />
+  <div class="container">
+    <!-- <img src="~assets/img/logo.png" alt="Nuxt.js Logo" class="logo" /> -->
     <h1 class="title">
       NEWS
     </h1>
-     <div class="column is-one-quarter"
-          v-for="(article, index) in articles"
-          :key="index">
-      <a :href="article.url" target="_blank">
-        <div class="card">
-          <div class="card-image">
-            <figure class="image is-3by2">
-              <img :src="article.urlToImage" :alt="article.title">
-            </figure>
+    <no-ssr>
+      <weather 
+          api-key="11fcbeefa79897d7a0d2af907557818b"
+          title="Weather"
+          :latitude="lat"
+          :longitude="long"
+          language="en"
+          units="us">
+      </weather>
+    </no-ssr>
+    <section class="mw7 center">
+      <article class="w-100 br2 shadow-3"
+           v-for="(article, index) in articles"
+           :key="index">
+        <a :href="article.url" class="link" target="_blank">
+          <div class="aspect-ratio aspect-ratio--6x4">
+            <div class="aspect-ratio--object cover"
+                 style="border-top-left-radius: 0.25rem; border-top-right-radius: 0.25rem;" 
+                 :style="`background:url(${article.urlToImage}) center;`"></div>
           </div>
-          <div class="card-content">
-            <div class="content">{{ article.title }}</div>
+          <div class="pa3">
+            <h3 class="f3 lh-title b mt0 mb2">{{ article.title }}</h3>
+            <p class="f5 lh-copy mt0">
+              {{ article.title }}
+            </p>
           </div>
-        </div>
-      </a>
-    </div>
-  </section>
+        </a>
+      </article>
+    </section>
+  </div>
 </template>
 
 <script>
 // import axios from '~/plugins/axios';
+import VueWeatherWidget from 'vue-weather-widget';
+import 'vue-weather-widget/dist/css/vue-weather-widget.css';
 
 export default {
   async asyncData({ app }) {
     const { articles } = await app.$axios.$get(
       `https://newsapi.org/v2/top-headlines?language=en&pageSize=50&apiKey=${
-        process.env.API_KEY
+        process.env.NEWS_API_KEY
       }`
     );
 
-    return { articles };
+    const weather = await app.$axios.$get(
+      `https://api.openweathermap.org/data/2.5/weather?q=London&APPID=${
+        process.env.WEATHER_API_KEY
+      }`
+    );
+
+    return { articles, weather: weather };
+  },
+  data() {
+    return {
+      online: true,
+      users: [],
+      lat: 0,
+      long: 0
+    };
   },
   head() {
     return {
-      title: 'Users'
+      title: 'Home'
     };
   },
   mounted() {
     console.log('articles: ', this.articles);
+    console.log('weather: ', this.weather);
+    if (!window.navigator) {
+      this.online = false;
+      return;
+    }
+    this.online = Boolean(window.navigator.onLine);
+    console.log('navigator: ', navigator);
+    window.addEventListener('offline', this._toggleNetworkStatus);
+    window.addEventListener('online', this._toggleNetworkStatus);
+    navigator.geolocation.getCurrentPosition(this._geoSuccess);
+  },
+  destroyed() {
+    window.removeEventListener('offline', this._toggleNetworkStatus);
+    window.removeEventListener('online', this._toggleNetworkStatus);
+  },
+  methods: {
+    _toggleNetworkStatus({ type }) {
+      this.online = type === 'online';
+    },
+    _geoSuccess(position) {
+      console.log('geo success. position is: ', position);
+      this.lat = position.coords.latitude;
+      this.long = position.coords.longitude;
+    }
+  },
+  components: {
+    weather: VueWeatherWidget
   }
 };
 </script>
 
 <style scoped>
-.title {
-  margin: 30px 0;
+.services-list {
+  padding: 0 0.75rem;
 }
-.users {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.services-list article {
+  width: calc(100%-1.5rem);
+  margin-bottom: 1.5rem;
 }
-.user {
-  margin: 10px 0;
-}
+/* @media (min-width: 768px) {
+  .services-list article {
+    width: calc(50%-1.5rem);
+  }
+} */
 </style>
